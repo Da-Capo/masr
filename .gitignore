@@ -1,12 +1,10 @@
 *
-!examples
+!data_aishell
+!traintask
 !models
+!utils
 !*.py
 !.gitignore
 !*.md
-!requirements.txt
-!docs/
-!images
-!*.svg
-!*.png
-!LICENSE*
+!*.json
+!*.manifest

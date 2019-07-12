@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 from torch.nn.utils import weight_norm
-from .base import MASRModel
-import feature
 
 
 class ConvBlock(nn.Module):
@@ -21,13 +19,9 @@ class ConvBlock(nn.Module):
         return x
 
 
-class GatedConv(MASRModel):
-    """ This is a model between Wav2letter and Gated Convnets.
-        The core block of this model is Gated Convolutional Network"""
-
+class GatedConv(nn.Module):
     def __init__(self, vocabulary, blank=0, name="masr"):
-        """ vocabulary : str : string of all labels such that vocaulary[0] == ctc_blank  """
-        super().__init__(vocabulary=vocabulary, name=name, blank=blank)
+        super().__init__()
         self.blank = blank
         self.vocabulary = vocabulary
         self.name = name
@@ -54,15 +48,3 @@ class GatedConv(MASRModel):
                     lens - module.kernel_size[0] + 2 * module.padding[0]
                 ) // module.stride[0] + 1
         return x, lens
-
-    def predict(self, path):
-        self.eval()
-        wav = feature.load_audio(path)
-        spec = feature.spectrogram(wav)
-        spec.unsqueeze_(0)
-        x_lens = spec.size(-1)
-        out = self.cnn(spec)
-        out_len = torch.tensor([out.size(-1)])
-        text = self.decode(out, out_len)
-        self.train()
-        return text[0]
