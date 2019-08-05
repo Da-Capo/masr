@@ -10,16 +10,17 @@ sys.path.append("..")
 from utils.decoder import GreedyDecoder
 from models.conv import GatedConv
 
-device = "cpu"
+device = "cuda"
 
 def train(
     model,
-    epochs=1000,
-    batch_size=64,
+    epochs=100,
+    start_epoch=0,
+    batch_size=48,
     train_index_path="../data_aishell/train-sort.manifest",
     dev_index_path="../data_aishell/dev.manifest",
     labels_path="../data_aishell/labels.json",
-    learning_rate=0.6,
+    learning_rate=0.06,
     momentum=0.8,
     max_grad_norm=0.2,
     weight_decay=0,
@@ -48,7 +49,7 @@ def train(
     # lr_sched = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.985)
     writer = tensorboard.SummaryWriter()
     gstep = 0
-    for epoch in range(epochs):
+    for epoch in range(start_epoch, epochs):
         epoch_loss = 0
         if epoch > 0:
             train_dataloader = train_dataloader_shuffle
@@ -57,6 +58,7 @@ def train(
         writer.add_scalar("lr/epoch", lr, epoch)
         for i, (x, y, x_lens, y_lens) in enumerate(train_dataloader):
             x = x.to(device)
+            y = y.to(device)
             out, out_lens = model(x, x_lens)
             out = out.transpose(0, 1).transpose(0, 2).log_softmax(2)
             loss = ctcloss(out, y, out_lens, y_lens)
@@ -112,8 +114,9 @@ def eval(model, dataloader):
 
 
 if __name__ == "__main__":
-    with open("../data_aishell/labels.json") as f:
-        vocabulary = json.load(f)
-    model = GatedConv(vocabulary)
+    model = GatedConv(json.load(open("../data_aishell/labels.json", encoding='utf-8')))
+    epoch = 40
+    model.load_state_dict(torch.load("pretrained/model_{}.pth".format(epoch)))
+    print("reload model: pretrained/model_{}.pth".format(epoch))
     model.to(device)
-    train(model)
+    train(model, start_epoch=epoch)

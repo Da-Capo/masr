@@ -9,11 +9,11 @@ from utils.feature import load_audio, spectrogram
 
 class MASRDataset(Dataset):
     def __init__(self, index_path, labels_path):
-        with open(index_path) as f:
+        with open(index_path,'r', encoding='utf-8') as f:
             idx = f.readlines()
         idx = [x.strip().split(",", 1) for x in idx]
         self.idx = idx
-        with open(labels_path) as f:
+        with open(labels_path, encoding='utf-8') as f:
             labels = json.load(f)
         self.labels = dict([(labels[i], i) for i in range(len(labels))])
         self.labels_str = labels

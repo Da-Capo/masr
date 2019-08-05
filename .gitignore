@@ -3,6 +3,7 @@
 !traintask
 !models
 !utils
+!lm
 !*.py
 !.gitignore
 !*.md

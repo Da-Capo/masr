@@ -3,7 +3,7 @@ import wave
 import numpy as np
 import torch
 
-def load_audio(wav_path, normalize=True):  # -> numpy array
+def load_audio(wav_path, normalize=False):  # -> numpy array
     with wave.open(wav_path) as wav:
         wav = np.frombuffer(wav.readframes(wav.getnframes()), dtype="int16")
         wav = wav.astype("float")
